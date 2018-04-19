@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phonebook</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+<h1>Phonebook</h1>
+<ul id="phonebook"></ul>
+<button id="btnLoad">Load</button>
+
+<h2>Create Contact</h2>
+Person: <input type="text" id="person"/>
+<br>
+Phone: <input type="text" id="phone"/>
+<br>
+<button id="btnCreate">Create</button>
+<script>
+    $(function () {
+        let person = $('#person');
+        let phone = $('#phone');
+        let createBtn = $('#btnCreate');
+        let loadBtn = $('#btnLoad');
+
+        const baseUrl = 'https://phonebook-nakov.firebaseio.com/phonebook';
+
+        createBtn.on('click', function () {
+            let contactData = {person: person.val(), phone: phone.val()};
+            person.val('');
+            phone.val('');
+            let request = {url: baseUrl + '.json', method: 'POST', data: JSON.stringify(contactData)};
+            $.ajax(request);
+        });
+
+        loadBtn.on('click', function () {
+            let request = {url: baseUrl + '.json', method: 'GET', success: loadContacts};
+            $.ajax(request);
+        });
+
+        function loadContacts(response) {
+            let list = $('#phonebook').empty();
+            for (let key in response) {
+                let liElement = $('<li>');
+                liElement.text(`${response[key]['person']}: ${response[key]['phone']}`);
+
+                let btnDelete = $('<button>').text('Delete').on('click', function () {
+                   deleteContact(key, liElement);
+                });
+
+                liElement.append(btnDelete);
+                list.append(liElement);
+            }
+        };
+
+        function deleteContact(key, element) {
+            let request = {url: baseUrl + '/' + key + '.json', method: 'DELETE', success: () => element.remove()};
+            $.ajax(request);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Blog</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+<h1>All Posts</h1>
+<button id="btnLoadPosts">Load Posts</button>
+<select id="posts"></select>
+<button id="btnViewPost">View</button>
+<h1 id="post-title">Post Details</h1>
+<ul id="post-body"></ul>
+<h2>Comments</h2>
+<ul id="post-comments"></ul>
+<script>
+    $(function () {
+        const baseUrl = 'https://baas.kinvey.com/appdata/kid_r1XGQ22LW';
+
+        let loadBtn = $('#btnLoadPosts');
+        let viewBtn = $('#btnViewPost');
+        let selectPost = $('#posts');
+        let postTitle = $('#post-title');
+        let postBody = $('#post-body');
+        let postComments = $('#post-comments');
+
+        let bodyText = [];
+
+        loadBtn.on('click', function () {
+            let request = {
+                url: baseUrl + '/posts', method: 'GET',
+                headers: {'Authorization': 'Basic ' + btoa('pesho:pesho')}
+                , success: loadOptions
+            };
+            $.ajax(request);
+
+            function loadOptions(response) {
+                selectPost.empty();
+                for (let post of response) {
+                    let optionPost = $('<option>').val(`${post._id}`);
+                    optionPost.text(`${post.title}`);
+                    bodyText.push({_id: post._id, body: post.body});
+                    selectPost.append(optionPost);
+                }
+            }
+        });
+
+        viewBtn.on('click', function () {
+            let selectedPost = $('#posts option:selected');
+            let requestQuery = {url:`${baseUrl}/comments/?query={"post_id":"${selectedPost.val()}"}`,
+                headers: {'Authorization': 'Basic ' + btoa('pesho:pesho')}
+                , method: 'GET', success: viewPost};
+            postTitle.text(selectedPost.text());
+            let body = bodyText.find((a) => a._id === selectedPost.val())['body'];
+            postBody.text(body);
+            $.ajax(requestQuery);
+            
+            function viewPost(response) {
+                postComments.empty()
+                for (let comment of response) {
+                    let li = $('<li>').text(comment['text']);
+                    postComments.append(li);
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

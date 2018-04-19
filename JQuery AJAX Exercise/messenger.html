@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Messenger</title>
+    <style>
+        label {
+            display: inline-block;
+            width: 5em;
+        }
+
+        #author, #content {
+            width: 30em;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+<div id="main">
+    <textarea id="messages" cols="80" rows="12" disabled="true"></textarea>
+    <div id="controls">
+        <label for="author">Name: </label><input id="author" type="text"><br>
+        <label for="content">Message: </label><input id="content" type="text">
+        <input id="submit" type="button" value="Send">
+        <input id="refresh" type="button" value="Refresh">
+    </div>
+</div>
+<script>
+    $(function () {
+        let messages = $('#messages');
+        let author = $('#author');
+        let content = $('#content');
+        let submitBtn = $('#submit');
+        let refreshBtn = $('#refresh');
+        const baseUrl = 'https://messenger-53e04.firebaseio.com/messenger';
+
+        submitBtn.on('click', function () {
+            let messageObj = {author: author.val(), content: content.val(), timestamp: Date.now()};
+            let request = {url: baseUrl + '.json', method: 'POST', data: JSON.stringify(messageObj)};
+            $.ajax(request);
+
+            author.val('');
+            content.val('');
+        });
+
+        refreshBtn.on('click', function () {
+            let request = {url: baseUrl + '.json', method: 'GET', success: loadMessages};
+            $.ajax(request);
+
+            function loadMessages(response) {
+                let allMessages = [];
+                for (var obj in response) {
+                    allMessages.push(response[obj]);
+                }
+                allMessages = allMessages.sort(function (a,b) {
+                    return a['timestamp'] > b['timestamp'];
+                });
+                let output = '';
+                for (var obj in allMessages) {
+                    output += allMessages[obj].author + ': ' + allMessages[obj].content + '\n';
+                }
+                messages.text(output);
+            }
+            
+        });
+
+    });
+</script>
+</body>
+</html>

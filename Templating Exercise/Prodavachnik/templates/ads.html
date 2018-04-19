@@ -1,0 +1,22 @@
+<section id="viewAds" class="viewAds show-hide">
+    <h1 class="titleForm">Advertisements</h1>
+    {{#if ads}}
+    <div id="ads" class="ads">
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Publisher</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Date Published</th>
+                <th>Actions</th>
+            </tr>
+            {{#each ads}}
+                {{> ad}}
+            {{/each}}
+        </table>
+    </div>
+    {{else}}
+    <p>No advertisement available.</p>
+    {{/if}}
+</section>
